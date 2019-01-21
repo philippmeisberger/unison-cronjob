@@ -1,0 +1,37 @@
+.TH unison-cronjob 1 "June 2015" "" "Unison Cronjob"
+
+.SH NAME
+\fBunison-cronjob\fP - Schedules Unison file synchronization
+
+.SH SYNOPSIS
+.nf
+.fam C
+\fBunison-cronjob\fP [\fB--interactive\fP | \fB--help\fP]
+.fam T
+.fi
+
+.SH DESCRIPTION
+\fBunison-cronjob\fP is an helper to schedule file synchronization using Unison. Per default it invokes Unison every 15 minutes.
+
+Edit file /etc/unison-cronjob.conf and specify the user and the Unison profile name. Edit file /etc/cron.d/unison-cronjob and replace "user" by your username (not root!).
+
+.SH OPTIONS
+
+.TP
+\fB--interactive\fR, \fB-i\fR
+Start Unison in graphical mode (if available).
+
+.TP
+\fB--help\fR, \fB-h\fR
+Display this help text.
+
+.SH FILES
+/etc/unison-cronjob.conf
+/etc/cron.d/unison-cronjob
+
+.SH AUTHORS
+Bastian Raschke <bastian.raschke@posteo.de>
+.br
+Philipp Meisberger <team@pm-codeworks.de>
+
+Please send bug reports to one of those mail addresses. Visit www.pm-codeworks.de and www.sicherheitskritisch.de for more interesting projects.

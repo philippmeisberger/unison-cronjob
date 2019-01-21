@@ -1,0 +1,103 @@
+#!/bin/sh
+
+##
+## Unison Cronjob
+## Copyright (C) 2015 Bastian Raschke <bastian.raschke@posteo.de>,
+##                    Philipp Meisberger <team@pm-codeworks.de>
+## All rights reserved.
+##
+
+. /etc/unison-cronjob.conf
+
+NAME="Unison Cronjob"
+PATH_LOCAL_LOCKFILE="/home/${UNISON_USER}/.unisonsync-lock"
+
+if ( test "${USER}" = "root" ); then
+    echo "`basename ${0}`: Error: This script must not be executed as root!"
+    exit 1
+fi
+
+## Shows a notification for user.
+##
+## @param TITLE The title of the message box
+## @param MESSAGE The message of the box
+## @return void
+##
+notify_user()
+{
+    echo "${NAME}: ${1}: ${2}"
+
+    ## Must have for using notify-send command
+    DISPLAY=:0.0
+    notify-send -i unison-gtk "${NAME}: ${1}" "${2}"
+}
+
+## "Semaphore" management
+##
+
+## Registers lockfile trap
+trap "rm -f ${PATH_LOCAL_LOCKFILE}" 0 2 3 15
+
+## Be sure only one instance is running
+if ( test -f "${PATH_LOCAL_LOCKFILE}" ); then
+    notify_user "Warning" "Can't start ${NAME} (still running instance detected)!";
+    exit 1
+fi
+
+## Creates lockfile
+touch "${PATH_LOCAL_LOCKFILE}"
+
+## Check for network connection
+ping 8.8.8.8 -c 2 -w 2 > /dev/null
+
+## No network connection?
+if [ "${?}" != 0 ]; then
+    if [ "${1}" == "--cronjob-mode" ]; then
+        echo "${NAME}: No network connection!" >&2
+    else
+        notify_user "Warning" "No network connection!"
+    fi
+    exit 2
+fi
+
+## Synchronisation process
+##
+case "${1}" in
+
+    ## Graphical mode
+    ## Run Unison in graphical mode
+    --interactive|-i)
+        unison "${UNISON_PROFILE}" -ui graphic
+
+        if [ "${?}" != 0 ]; then
+            notify_user "Error" "The sync process failed!"
+            exit 1
+        fi
+    ;;
+
+    --help|-h)
+        echo "Unison file synchronisation scheduler"
+        echo ""
+        echo "Usage: `basename ${0}` [Options]"
+        echo "Options (optional): --interactive"
+        echo ""
+        echo "Options"
+        echo "--interactive      Start Unison in graphical mode (if available)."
+        echo ""
+        exit 0
+    ;;
+
+    ## Cronjob mode per default
+    ## Run Unison in "silent" mode (auto-accept non-conflict elements and output nothing except of errors).
+    *)
+        unison "${UNISON_PROFILE}" -ui text -silent
+
+        if [ "${?}" != 0 ]; then
+            notify_user "Error" "The sync process failed!"
+            exit 1
+        fi
+    ;;
+
+esac
+
+:

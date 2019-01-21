@@ -1,0 +1,13 @@
+Source: unison-cronjob
+Maintainer: Philipp Meisberger <team@pm-codeworks.de>
+Section: shells
+Priority: optional
+Standards-Version: 3.9.8
+Build-Depends: debhelper (>= 9)
+Vcs-Git: https://github.com/philippmeisberger/unison-cronjob.git
+
+Package: unison-cronjob
+Depends: unison | unison-gtk, cron, libnotify-bin, ${misc:Depends}
+Architecture: all
+Description: Cronjob for Unison
+ Helper to schedule file synchronization using Unison.
